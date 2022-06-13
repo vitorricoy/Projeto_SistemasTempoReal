@@ -49,7 +49,6 @@ class Server:
         buyer = self.global_state.clients_data[buyer_id]
         seller = self.global_state.clients_data[seller_id]
         if buyer is None or seller is None:
-            print('none')
             return # Not found
 
         buyer.buy(effective_price, request.ticker)
@@ -62,7 +61,6 @@ class Server:
         seller = self.global_state.clients_data[client_id]
         buyer = self.global_state.clients_data[other_client_id]
         if seller is None or buyer is None:
-            print('none')
             return # Not found
 
         buyer.buy(effective_price, request.ticker)
