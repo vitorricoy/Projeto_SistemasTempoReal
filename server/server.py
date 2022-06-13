@@ -1,4 +1,7 @@
-from typing import List
+from collections import defaultdict
+from decimal import Decimal
+from email.policy import default
+from typing import Dict, List
 from state.buy_request import BuyRequest
 from state.request import Request
 from state.sell_request import SellRequest
@@ -13,25 +16,34 @@ class Server:
         all_requests: List[Request] = self.global_state.buy_queue + self.global_state.sell_queue
         all_requests.sort(key=lambda req: req.index)
 
+        prices = defaultdict(lambda: None)
+
         while len(all_requests) > 0:
             request = all_requests.pop(0)
-            print(f'looking at request {request.index}')
             match = self.get_potential_match(request, all_requests)
             if match is None:
                 # no match
                 continue # TODO: maybe persist this order for the next period
             else:
-                print(f'request {request.index} matched with {match.index}')
                 # TODO: maybe add locks?
                 if request.type == 'BUY':
-                    self.perform_buy_operation(request, match)
+                    effective_price = request.max_price # Here the BUY price is chosen - could be the other way around
+                    self.perform_buy_operation(effective_price, request, match)
                 else:
-                    self.perform_sell_operation(request, match)
-
+                    effective_price = match.max_price # Here the BUY price is chosen - could be the other way around
+                    self.perform_sell_operation(effective_price, request, match)
+                
+                prices[request.ticker] = effective_price
                 all_requests.remove(match)
+            
+            self.update_prices(prices)
+    
+    def update_prices(self, seen_prices: Dict[str, Decimal]):
+        # If necessary, we can calculate some sort of delta here for display purposes
+        for (ticker, price) in seen_prices.items():
+            self.global_state.stock_prices[ticker] = price
 
-    def perform_buy_operation(self, request: BuyRequest, match: SellRequest):
-        effective_price = request.max_price # Here the BUY price is chosen - could be the other way around
+    def perform_buy_operation(self, effective_price: Decimal, request: BuyRequest, match: SellRequest):
         buyer_id = request.client_id
         seller_id = match.client_id
         
@@ -44,8 +56,7 @@ class Server:
         buyer.buy(effective_price, request.ticker)
         seller.sell(effective_price, request.ticker)
 
-    def perform_sell_operation(self, request: SellRequest, match: BuyRequest):
-        effective_price = match.max_price # Here the BUY price is chosen - could be the other way around
+    def perform_sell_operation(self, effective_price: Decimal, request: SellRequest, match: BuyRequest):
         client_id = request.client_id
         other_client_id = match.client_id
         
@@ -93,5 +104,5 @@ class Server:
         
         self.index += 1
 
-    def current_prices(self):
-        pass
+    def current_prices(self) -> Dict[str, Decimal]:
+        return self.global_state.stock_prices
