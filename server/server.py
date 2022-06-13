@@ -1,6 +1,5 @@
 from collections import defaultdict
 from decimal import Decimal
-from email.policy import default
 from typing import Dict, List
 from state.buy_request import BuyRequest
 from state.request import Request
@@ -22,8 +21,8 @@ class Server:
             request = all_requests.pop(0)
             match = self.get_potential_match(request, all_requests)
             if match is None:
-                # no match
-                continue # TODO: maybe persist this order for the next period
+                # no match, nothing we can do
+                continue
             else:
                 # TODO: maybe add locks?
                 if request.type == 'BUY':
