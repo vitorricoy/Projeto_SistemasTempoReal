@@ -11,4 +11,5 @@ class GlobalState:
         self.buy_queue: List[BuyRequest] = []
         self.sell_queue: List[SellRequest] = []
         self.clients_data: Dict[str, ClientData] = defaultdict(lambda: None)
+        self.stock_values: Dict[str, Decimal] = defaultdict(lambda: None)
         self.stock_prices: Dict[str, Decimal] = defaultdict(lambda: None)
