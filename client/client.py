@@ -3,6 +3,9 @@ import random
 from server.server import Server
 from state.sell_request import SellRequest
 from state.buy_request import BuyRequest
+from state.state import GlobalState
+from decimal import Decimal
+from typing import Dict, List
 
 class Client:
     def __init__(self, client_id: str, global_state: GlobalState, prefered_stocks : List[str], latency : Decimal, value_perception_modifier : Dict[str, Decimal], server: Server):
@@ -20,7 +23,7 @@ class Client:
     def evaluate_stocks(self):
         for stock in self.prefered_stocks:
             price = self.global_state.stock_prices[stock]
-            perceived_value = self.global_state.stock_values[stock] * value_perception_modifier[stock]
+            perceived_value = self.global_state.stock_values[stock] * self.value_perception_modifier[stock]
             #TODO: Maybe we can also implement a price history analysis for deciding to buy or sell
             price_perturbation = random.beta(2, 5) * abs(price - perceived_value)
             if perceived_value > price:
@@ -34,9 +37,4 @@ class Client:
     
     def wait_for_next_period(self):
         # TODO: use thread events to handle the synchronization of the different server periods
-
-
-
-
-
-    
+        pass
