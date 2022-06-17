@@ -4,8 +4,53 @@ from state.buy_request import BuyRequest
 from state.client_data import ClientData
 from state.sell_request import SellRequest
 from state.state import GlobalState
+import PySimpleGUI as sg
+
+def read_parameters():
+    layout = [
+        [sg.Text("Parâmetros para Execução do Algoritmo")], 
+        [sg.Text("Patrimônio Inicial dos Investidores:"), sg.In(key="balance")],
+        [sg.Text("Número de Investidores:"), sg.In(key="investors_num")],
+        [sg.Text("Número de Empresas:"), sg.In(key="companies_num")],
+        [sg.Text("Latência Máxima dos Clientes:"), sg.In(key="maximum_latency")],
+        [sg.Text("Variação da Percepção dos Investidores:"), sg.In(key="perception_variation"), sg.Text("%")],
+        [sg.Button("Executar")]
+    ]
+
+    window = sg.Window("Projeto - Sistemas de Tempo Real", layout)
+
+    values = []
+    while True:
+        event, values = window.read()
+        sucesso = True
+        if ('balance' in values and values['balance'] != '' and not values['balance'].isnumeric()):
+            window['balance'].update('Digite um número')
+            sucesso = False
+
+        if ('investors_num' in values and values['investors_num'] != '' and not values['investors_num'].isnumeric()):
+            window['investors_num'].update('Digite um número')
+            sucesso = False
+
+        if ('perception_variation' in values and values['perception_variation'] != '' and not values['perception_variation'].isnumeric()):
+            window['perception_variation'].update('Digite um número')
+            sucesso = False
+
+        if ('maximum_latency' in values and values['maximum_latency'] != '' and not values['maximum_latency'].isnumeric()):
+            window['maximum_latency'].update('Digite um número')
+            sucesso = False
+
+        if ('companies_num' in values and values['companies_num'] != '' and not values['companies_num'].isnumeric()):
+            window['companies_num'].update('Digite um número')
+            sucesso = False
+        
+        if (event == "OK" or event == sg.WIN_CLOSED) and sucesso:
+            break
+
+    window.close()
+    return values
 
 def main():
+    read_parameters()
     global_state = create_initial_state()
 
     server = Server(global_state)
@@ -45,6 +90,10 @@ def main():
 
     print(server.current_prices())
 
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+    plt.plot([1,2,3,4], [1,4,2,3])
+    plt.show()
 
 def create_initial_state():
     global_state = GlobalState()
