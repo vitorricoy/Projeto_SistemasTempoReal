@@ -8,6 +8,12 @@ class ClientData:
         self.balance = balance
         self.portfolio = initial_portfolio
 
+    def can_buy(self, price: decimal.Decimal):
+        return price <= self.balance
+
+    def can_sell(self, ticker: str):
+        return ticker in self.portfolio
+
     def buy(self, price: decimal.Decimal, ticker: str):
         if price > self.balance:
             raise Exception(f"client {self.id} with balance={self.balance} cant buy {ticker} for {price}")

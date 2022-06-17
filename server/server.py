@@ -18,6 +18,8 @@ class Server:
         prices = defaultdict(lambda: None)
 
         while len(all_requests) > 0:
+            if self.global_state.stop_threads:
+                break
             request = all_requests.pop(0)
             match = self.get_potential_match(request, all_requests)
             if match is None:
@@ -46,25 +48,43 @@ class Server:
         buyer_id = request.client_id
         seller_id = match.client_id
         
-        buyer = self.global_state.clients_data[buyer_id]
-        seller = self.global_state.clients_data[seller_id]
-        if buyer is None or seller is None:
-            return # Not found
+        if seller_id == 'Exchange':
+            buyer = self.global_state.clients_data[buyer_id]
+            if buyer is None:
+                return # Not found
 
-        buyer.buy(effective_price, request.ticker)
-        seller.sell(effective_price, request.ticker)
+            if buyer.can_buy(effective_price):
+                buyer.buy(effective_price, request.ticker)
+        else:
+            buyer = self.global_state.clients_data[buyer_id]
+            seller = self.global_state.clients_data[seller_id]
+            if buyer is None or seller is None:
+                return # Not found
+
+            if buyer.can_buy(effective_price) and seller.can_sell(request.ticker):
+                seller.sell(effective_price, request.ticker)
+                buyer.buy(effective_price, request.ticker)
 
     def perform_sell_operation(self, effective_price: Decimal, request: SellRequest, match: BuyRequest):
-        client_id = request.client_id
-        other_client_id = match.client_id
+        seller_id = request.client_id
+        buyer_id = match.client_id
         
-        seller = self.global_state.clients_data[client_id]
-        buyer = self.global_state.clients_data[other_client_id]
-        if seller is None or buyer is None:
-            return # Not found
+        if seller_id == 'Exchange':
+            buyer = self.global_state.clients_data[buyer_id]
+            if buyer is None:
+                return # Not found
+            if buyer.can_buy(effective_price):
+                buyer.buy(effective_price, request.ticker)
+        else:
+            seller = self.global_state.clients_data[seller_id]
+            buyer = self.global_state.clients_data[buyer_id]
 
-        buyer.buy(effective_price, request.ticker)
-        seller.sell(effective_price, request.ticker)
+            if seller is None or buyer is None:
+                return # Not found
+
+            if buyer.can_buy(effective_price) and seller.can_sell(request.ticker):
+                seller.sell(effective_price, request.ticker)
+                buyer.buy(effective_price, request.ticker)
 
     def get_potential_match(self, request: Request, all_requests: List[Request]):
         if request.type == 'BUY':
