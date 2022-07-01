@@ -67,8 +67,8 @@ def run_server_process_period(server, process_period, global_state):
     global_state.stop_threads = False
     thread = threading.Thread(target = server.process)
     thread.start()
-    global_state.stop_threads = True
     time.sleep(process_period/1000)
+    global_state.stop_threads = True
     thread.join()
 
 def empty_order_queues(global_state):

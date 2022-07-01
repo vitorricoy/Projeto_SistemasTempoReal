@@ -68,13 +68,13 @@ class Graphics:
         ax[2,1].set_title("Stock Values")
         ax[2,2].set_title("Server Lost Deadlines")
 
-        if len(clients_list) < 10:
+        if len(clients_list) <= 10:
             ax[0,0].legend(loc="upper right")
             ax[0,1].legend(loc="upper right")
             ax[0,2].legend(loc="upper right")
             ax[1,0].legend(loc="upper right")
 
-        if len(companies_list) < 10:
+        if len(companies_list) <= 10:
             ax[2,0].legend(loc="upper right")
             ax[2,1].legend(loc="upper right")
 
