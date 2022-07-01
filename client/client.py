@@ -25,17 +25,14 @@ class Client:
         # The update happens on the global state list, so we only need to simulate the latency
         time.sleep(self.latency)
 
+    def register_lost_deadline(self):
+        self.global_state.clients_data[self.client_id].lost_deadline += 1
+
     def evaluate_stocks(self):
         for stock in self.prefered_stocks:
-            if (self.global_state.stop_threads):
-                self.global_state.clients_data[self.client_id].lost_deadline += 1
-                break
             price = self.global_state.stock_prices[stock]
             perceived_value = self.global_state.stock_values[stock] + self.global_state.stock_values[stock] * self.value_perception_modifier
             time.sleep(self.decision_time)
-            if (self.global_state.stop_threads):
-                self.global_state.clients_data[self.client_id].lost_deadline += 1
-                break
             #TODO: Maybe we can also implement a price history analysis for deciding to buy or sell
             price_perturbation = np.random.beta(2, 5) * abs(price - perceived_value)
             if perceived_value > price:

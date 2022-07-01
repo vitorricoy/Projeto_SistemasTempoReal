@@ -18,9 +18,6 @@ class Server:
         prices = defaultdict(lambda: None)
 
         while len(all_requests) > 0:
-            if self.global_state.stop_threads:
-                self.global_state.lost_server_deadlines += 1
-                break
             request = all_requests.pop(0)
             match = self.get_potential_match(request, all_requests)
             if match is None:
@@ -45,6 +42,9 @@ class Server:
         for (ticker, price) in seen_prices.items():
             self.global_state.stock_prices[ticker] = price
 
+    def register_lost_deadline(self):
+        self.global_state.lost_server_deadlines += 1
+
     def perform_buy_operation(self, effective_price: Decimal, request: BuyRequest, match: SellRequest):
         buyer_id = request.client_id
         seller_id = match.client_id
@@ -55,6 +55,7 @@ class Server:
                 return # Not found
 
             if buyer.can_buy(effective_price):
+                print(buyer_id, 'comprou o ativo', request.ticker, 'do cliente', seller_id)
                 buyer.buy(effective_price, request.ticker)
         else:
             buyer = self.global_state.clients_data[buyer_id]
@@ -63,6 +64,7 @@ class Server:
                 return # Not found
 
             if buyer.can_buy(effective_price) and seller.can_sell(request.ticker):
+                print(buyer_id, 'comprou o ativo', request.ticker, 'do cliente', seller_id)
                 seller.sell(effective_price, request.ticker)
                 buyer.buy(effective_price, request.ticker)
 
@@ -75,6 +77,7 @@ class Server:
             if buyer is None:
                 return # Not found
             if buyer.can_buy(effective_price):
+                print(buyer_id, 'comprou o ativo', request.ticker, 'do cliente', seller_id)
                 buyer.buy(effective_price, request.ticker)
         else:
             seller = self.global_state.clients_data[seller_id]
@@ -84,6 +87,7 @@ class Server:
                 return # Not found
 
             if buyer.can_buy(effective_price) and seller.can_sell(request.ticker):
+                print(buyer_id, 'comprou o ativo', request.ticker, 'do cliente', seller_id)
                 seller.sell(effective_price, request.ticker)
                 buyer.buy(effective_price, request.ticker)
 

@@ -2,6 +2,7 @@ import random
 import threading
 from client.client import Client
 from graphics import Graphics
+from task import Task
 from parameters_input import ParametersInput
 from server.server import Server
 from state import statistics
@@ -48,33 +49,43 @@ def main():
 def run_loop(clients, server, global_state, request_period, process_period, number_of_stocks):
     while True:
         simulate_IPO(global_state, number_of_stocks)
-        threads = []
-        for client in clients:
-            threads.append(threading.Thread(target = client.run_stocks_evaluation))
-        global_state.stop_threads = False
-        for thread in threads:
-            thread.start()
-        time.sleep(request_period/1000)
-        global_state.stop_threads = True
-        for thread in threads:
-            thread.join()
-        global_state.stop_threads = False
-        buy_orders = len(global_state.buy_queue)
-        sell_orders = len(global_state.sell_queue)
-        thread = threading.Thread(target = server.process)
-        thread.start()
-        time.sleep(process_period/1000)
-        global_state.stop_threads = True
-        thread.join()
-        global_state.statistics = (statistics.Statistics(
+        run_client_request_period(clients, request_period)
+        run_server_process_period(server, process_period)
+        register_statistics(global_state)
+        empty_order_queues(global_state)
+
+def run_server_process_period(server, process_period):
+    server_task = Task()
+    thread = threading.Thread(target = server_task.run_task, args=(server.process, process_period/1000, server.register_lost_deadline))
+    thread.start()
+    time.sleep(process_period/1000)
+    thread.join()
+
+def empty_order_queues(global_state):
+    global_state.buy_queue = []
+    global_state.sell_queue = []
+
+def register_statistics(global_state):
+    buy_orders = len(global_state.buy_queue)
+    sell_orders = len(global_state.sell_queue)
+    global_state.statistics = (statistics.Statistics(
             global_state.statistics.clients_data + [global_state.clients_data],
             global_state.statistics.lost_server_deadlines + [global_state.lost_server_deadlines], 
             global_state.statistics.buy_orders + [buy_orders], 
             global_state.statistics.sell_orders + [sell_orders], 
             global_state.statistics.stock_prices + [global_state.stock_prices], 
             global_state.statistics.stock_values + [global_state.stock_values])) 
-        global_state.buy_queue = []
-        global_state.sell_queue = []
+
+def run_client_request_period(clients, request_period):
+    threads = []
+    for client in clients:
+        client_task = Task()
+        threads.append(threading.Thread(target = client_task.run_task, args=(client.run_stocks_evaluation, request_period/1000, client.register_lost_deadline)))
+    for thread in threads:
+        thread.start()
+    time.sleep(request_period/1000)
+    for thread in threads:
+        thread.join()
 
 def simulate_IPO(global_state, number_of_stocks):
     for company in list(global_state.stock_prices.keys()):
