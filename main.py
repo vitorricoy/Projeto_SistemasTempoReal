@@ -86,7 +86,7 @@ def simulate_IPO(global_state, number_of_stocks):
             global_state.sell_queue.append(SellRequest('Exchange', company, global_state.stock_values[company]))
 
 def generate_decision_time_and_perceptions(investors_num, perception_variation, max_processing_time):
-    decision_times = [random.uniform(1, max_processing_time)/max_processing_time for _ in range(investors_num)]
+    decision_times = [random.uniform(1, max_processing_time)/1000 for _ in range(investors_num)]
     perceptions = [random.uniform(-perception_variation, perception_variation) for _ in range(investors_num)]
     perceptions.sort()
     sorted_decision_times = list(enumerate(decision_times))

@@ -9,10 +9,10 @@ class ParametersInput:
             'perception_variation': 30,
             'maximum_latency': 10,
             'companies_num': 5,
-            'request_period': 1000,
+            'request_period': 500,
             'process_period': 100,
             'number_of_stocks': 5,
-            'max_client_processing_time': 10
+            'max_client_processing_time': 5
         }
 
         layout = [
