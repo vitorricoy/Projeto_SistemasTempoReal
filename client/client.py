@@ -28,18 +28,35 @@ class Client:
     def register_lost_deadline(self):
         self.global_state.clients_data[self.client_id].lost_deadline += 1
 
+    def check_for_interruption(self):
+        if self.global_state.stop_threads:
+            self.register_lost_deadline()
+            return True
+        return False
+
     def evaluate_stocks(self):
         for stock in self.prefered_stocks:
+            if self.check_for_interruption():
+                return
             price = self.global_state.stock_prices[stock]
             perceived_value = self.global_state.stock_values[stock] + self.global_state.stock_values[stock] * self.value_perception_modifier
-            time.sleep(self.decision_time)
+            for _ in range(int(self.decision_time/100)):
+                if self.check_for_interruption():
+                    return
+                time.sleep(0.01)
+            if self.check_for_interruption():
+                return
             #TODO: Maybe we can also implement a price history analysis for deciding to buy or sell
             price_perturbation = np.random.beta(2, 5) * abs(price - perceived_value)
-            if perceived_value > price:
+            if perceived_value < price:
+                if self.check_for_interruption():
+                    return
                 # Should sell the current price minus a small variation with a certain probability
                 sell_price = price - price_perturbation
                 self.server.receive_request(SellRequest(self.client_id, stock, sell_price))
             else:
+                if self.check_for_interruption():
+                    return
                 # Should buy, paying the current price plus a small variation with a certain probability
                 buy_price = price + price_perturbation
                 self.server.receive_request(BuyRequest(self.client_id, stock, buy_price))

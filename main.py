@@ -2,7 +2,6 @@ import random
 import threading
 from client.client import Client
 from graphics import Graphics
-from task import Task
 from parameters_input import ParametersInput
 from server.server import Server
 from state import statistics
@@ -13,7 +12,7 @@ import time
 
 def main():
     parameters_input = ParametersInput()
-    parameters = parameters_input.read_parameters()
+    parameters = parameters_input.new_read_parameters()
     global_state = create_initial_state(parameters)
 
     server = Server(global_state)
@@ -42,22 +41,33 @@ def main():
     thread = threading.Thread(target = graphics.plot_graph, args= (global_state, int(parameters['request_period']) + int(parameters['process_period']), companies, clients_id))
     thread.start()
 
-    run_loop(clients, server, global_state, int(parameters['request_period']), int(parameters['process_period']), int(parameters['number_of_stocks']))
+    run_loop(clients, server, global_state, int(parameters['request_period']), int(parameters['process_period']), int(parameters['number_of_stocks']), float(parameters['stock_price_variation']))
 
-    thread.join()
-
-def run_loop(clients, server, global_state, request_period, process_period, number_of_stocks):
+def run_loop(clients, server, global_state, request_period, process_period, number_of_stocks, stock_price_variation):
+    cont = 0
     while True:
         simulate_IPO(global_state, number_of_stocks)
-        run_client_request_period(clients, request_period)
-        run_server_process_period(server, process_period)
+        run_client_request_period(clients, request_period, global_state)
+        run_server_process_period(server, process_period, global_state)
         register_statistics(global_state)
         empty_order_queues(global_state)
+        if cont == 10:
+            cont = 0
+            handle_stock_price_variation(global_state, stock_price_variation)
+        else:
+            cont+=1
 
-def run_server_process_period(server, process_period):
-    server_task = Task()
-    thread = threading.Thread(target = server_task.run_task, args=(server.process, process_period/1000, server.register_lost_deadline))
+def handle_stock_price_variation(global_state, stock_price_variation):
+    for company in list(global_state.stock_values.keys()):
+        variation = random.uniform(-stock_price_variation, stock_price_variation)/100
+        global_state.stock_values[company] *= (1+variation)
+
+
+def run_server_process_period(server, process_period, global_state):
+    global_state.stop_threads = False
+    thread = threading.Thread(target = server.process)
     thread.start()
+    global_state.stop_threads = True
     time.sleep(process_period/1000)
     thread.join()
 
@@ -76,14 +86,15 @@ def register_statistics(global_state):
             global_state.statistics.stock_prices + [global_state.stock_prices], 
             global_state.statistics.stock_values + [global_state.stock_values])) 
 
-def run_client_request_period(clients, request_period):
+def run_client_request_period(clients, request_period, global_state):
     threads = []
+    global_state.stop_threads = False
     for client in clients:
-        client_task = Task()
-        threads.append(threading.Thread(target = client_task.run_task, args=(client.run_stocks_evaluation, request_period/1000, client.register_lost_deadline)))
+        threads.append(threading.Thread(target = client.run_stocks_evaluation))
     for thread in threads:
         thread.start()
     time.sleep(request_period/1000)
+    global_state.stop_threads = True
     for thread in threads:
         thread.join()
 
@@ -99,7 +110,7 @@ def simulate_IPO(global_state, number_of_stocks):
 def generate_decision_time_and_perceptions(investors_num, perception_variation, max_processing_time):
     decision_times = [random.uniform(1, max_processing_time)/1000 for _ in range(investors_num)]
     perceptions = [random.uniform(-perception_variation, perception_variation) for _ in range(investors_num)]
-    perceptions.sort()
+    perceptions.sort(key=lambda x: abs(x))
     sorted_decision_times = list(enumerate(decision_times))
     sorted_decision_times.sort(key= lambda x: x[1])
     mapping_index_perception_position = dict()

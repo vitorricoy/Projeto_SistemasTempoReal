@@ -68,14 +68,15 @@ class Graphics:
         ax[2,1].set_title("Stock Values")
         ax[2,2].set_title("Server Lost Deadlines")
 
-        ax[0,0].legend(loc="upper right")
-        ax[0,1].legend(loc="upper right")
-        ax[0,2].legend(loc="upper right")
-        ax[1,0].legend(loc="upper right")
-        ax[1,1].legend(loc="upper right")
-        ax[1,2].legend(loc="upper right")
-        ax[2,0].legend(loc="upper right")
-        ax[2,1].legend(loc="upper right")
+        if len(clients_list) < 10:
+            ax[0,0].legend(loc="upper right")
+            ax[0,1].legend(loc="upper right")
+            ax[0,2].legend(loc="upper right")
+            ax[1,0].legend(loc="upper right")
+
+        if len(companies_list) < 10:
+            ax[2,0].legend(loc="upper right")
+            ax[2,1].legend(loc="upper right")
 
         def animation_frame(i):
             nonlocal x_upper_lim, x_lower_lim
@@ -124,6 +125,7 @@ class Graphics:
                 ax[1,2].set_xlim(x_lower_lim, x_upper_lim)
                 ax[2,0].set_xlim(x_lower_lim, x_upper_lim)
                 ax[2,1].set_xlim(x_lower_lim, x_upper_lim)
+                ax[2,2].set_xlim(x_lower_lim, x_upper_lim)
 
             for i, client in enumerate(clients_list):
                 ax[0,0].plot(x_data, y00_data[i], label=client, color=cmap(i/total))    

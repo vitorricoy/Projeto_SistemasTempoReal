@@ -16,3 +16,4 @@ class GlobalState:
         self.stock_prices: Dict[str, Decimal] = defaultdict(lambda: None)
         self.statistics: Statistics = Statistics([],[],[],[],[],[])
         self.lost_server_deadlines = 0
+        self.stop_threads = False

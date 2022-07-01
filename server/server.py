@@ -18,12 +18,16 @@ class Server:
         prices = defaultdict(lambda: None)
 
         while len(all_requests) > 0:
+            if self.check_for_interruption():
+                return
             request = all_requests.pop(0)
             match = self.get_potential_match(request, all_requests)
             if match is None:
                 # no match, nothing we can do
                 continue
             else:
+                if self.check_for_interruption():
+                    return
                 # TODO: maybe add locks?
                 if request.type == 'BUY':
                     effective_price = request.max_price # Here the BUY price is chosen - could be the other way around
@@ -32,11 +36,20 @@ class Server:
                     effective_price = match.max_price # Here the BUY price is chosen - could be the other way around
                     self.perform_sell_operation(effective_price, request, match)
                 
+                if self.check_for_interruption():
+                    return
                 prices[request.ticker] = effective_price
                 all_requests.remove(match)
-            
+            if self.check_for_interruption():
+                    return
             self.update_prices(prices)
     
+    def check_for_interruption(self):
+        if self.global_state.stop_threads:
+            self.register_lost_deadline()
+            return True
+        return False
+
     def update_prices(self, seen_prices: Dict[str, Decimal]):
         # If necessary, we can calculate some sort of delta here for display purposes
         for (ticker, price) in seen_prices.items():
@@ -55,7 +68,7 @@ class Server:
                 return # Not found
 
             if buyer.can_buy(effective_price):
-                print(buyer_id, 'comprou o ativo', request.ticker, 'do cliente', seller_id)
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id)
                 buyer.buy(effective_price, request.ticker)
         else:
             buyer = self.global_state.clients_data[buyer_id]
@@ -64,7 +77,7 @@ class Server:
                 return # Not found
 
             if buyer.can_buy(effective_price) and seller.can_sell(request.ticker):
-                print(buyer_id, 'comprou o ativo', request.ticker, 'do cliente', seller_id)
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id)
                 seller.sell(effective_price, request.ticker)
                 buyer.buy(effective_price, request.ticker)
 
@@ -77,7 +90,7 @@ class Server:
             if buyer is None:
                 return # Not found
             if buyer.can_buy(effective_price):
-                print(buyer_id, 'comprou o ativo', request.ticker, 'do cliente', seller_id)
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id)
                 buyer.buy(effective_price, request.ticker)
         else:
             seller = self.global_state.clients_data[seller_id]
@@ -87,7 +100,7 @@ class Server:
                 return # Not found
 
             if buyer.can_buy(effective_price) and seller.can_sell(request.ticker):
-                print(buyer_id, 'comprou o ativo', request.ticker, 'do cliente', seller_id)
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id)
                 seller.sell(effective_price, request.ticker)
                 buyer.buy(effective_price, request.ticker)
 

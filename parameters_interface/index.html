@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eel example</title>
+
+    <link rel="stylesheet" href="css/main.css">
+    <script type="text/javascript" src="/eel.js"></script>
+</head>
+
+<body>
+    <form class="form" id="parameters">
+        <p>
+            The investors latency is inversly proportional to the investor perception. The investor with worst
+            perception
+            is assigned the best latency.
+        </p>
+        <p>
+            The investors perception goes from [-p, p]. The same goes with the stock price variation.
+        </p>
+        <div>
+            <label for="balance"> Initial Client Balance ($):</label>
+            <input id="balance" name="balance" type="number" value="100" />
+        </div>
+        <div>
+            <label for="investors_num"> Number of Investors:</label>
+            <input id="investors_num" name="investors_num" type="number" value="5" />
+        </div>
+        <div>
+            <label for="perception_variation"> Maximum Perception Variation of Investors (%):</label>
+            <input id="perception_variation" name="perception_variation" type="number" value="30" />
+        </div>
+        <div>
+            <label for="stock_price_variation"> Stock Price Variation (%):</label>
+            <input id="stock_price_variation" name="stock_price_variation" type="number" value="1" />
+        </div>
+        <div>
+            <label for="maximum_latency"> Maximum Latency of Investors (ms):</label>
+            <input id="maximum_latency" name="maximum_latency" type="number" value="10" />
+        </div>
+        <div>
+            <label for="companies_num"> Number of Companies:</label>
+            <input id="companies_num" name="companies_num" type="number" value="5" />
+        </div>
+        <div>
+            <label for="request_period">Size of the Request Period (ms):</label>
+            <input id="request_period" name="request_period" type="number" value="500" />
+        </div>
+        <div>
+            <label for="process_period">Size of the Process Period (ms):</label>
+            <input id="process_period" name="process_period" type="number" value="100" />
+        </div>
+        <div>
+            <label for="number_of_stocks">Number of Stocks per Company:</label>
+            <input id="number_of_stocks" name="number_of_stocks" type="number" value="5" />
+        </div>
+        <div>
+            <label for="max_client_processing_time">Max Client Decision Time (ms):</label>
+            <input id="max_client_processing_time" name="max_client_processing_time" type="number" value="5" />
+        </div>
+        <input type="submit" value="Run">
+    </form>
+</body>
+<script src="js/main.js"></script>
+
+</html>
