@@ -3,10 +3,11 @@ from typing import List
 
 
 class ClientData:
-    def __init__(self, id: str, balance: decimal.Decimal, initial_portfolio: List[str] = []) -> None:
+    def __init__(self, id: str, balance: decimal.Decimal, lost_deadline: int, initial_portfolio: List[str] = []) -> None:
         self.id = id
         self.balance = balance
         self.portfolio = initial_portfolio
+        self.lost_deadline = lost_deadline
 
     def can_buy(self, price: decimal.Decimal):
         return price <= self.balance

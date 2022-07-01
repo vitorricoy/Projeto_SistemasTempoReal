@@ -19,6 +19,7 @@ class Server:
 
         while len(all_requests) > 0:
             if self.global_state.stop_threads:
+                self.global_state.lost_server_deadlines += 1
                 break
             request = all_requests.pop(0)
             match = self.get_potential_match(request, all_requests)
