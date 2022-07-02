@@ -1,3 +1,4 @@
+import threading
 from collections import defaultdict
 from decimal import Decimal
 from typing import Dict, List
@@ -17,3 +18,4 @@ class GlobalState:
         self.statistics: Statistics = Statistics([],[],[],[],[],[])
         self.lost_server_deadlines = 0
         self.stop_threads = False
+        self.state_mutex = threading.Lock()

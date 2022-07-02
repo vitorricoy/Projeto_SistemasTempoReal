@@ -132,11 +132,12 @@ class Server:
 
     def receive_request(self, request):
         request.index = self.index
+        self.global_state.state_mutex.acquire()
         if request.type == 'BUY':
             self.global_state.buy_queue.append(request)
         elif request.type == 'SELL':
             self.global_state.sell_queue.append(request)
-        
+        self.global_state.state_mutex.release()
         self.index += 1
 
     def current_prices(self) -> Dict[str, Decimal]:

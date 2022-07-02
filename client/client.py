@@ -38,8 +38,10 @@ class Client:
         for stock in self.prefered_stocks:
             if self.check_for_interruption():
                 return
+            self.global_state.state_mutex.acquire()
             price = self.global_state.stock_prices[stock]
             perceived_value = self.global_state.stock_values[stock] + self.global_state.stock_values[stock] * self.value_perception_modifier
+            self.global_state.state_mutex.release()
             for _ in range(int(self.decision_time/100)):
                 if self.check_for_interruption():
                     return
