@@ -1,6 +1,9 @@
+var paramValues;
+
 eel.get_parameters_and_random_client_data()(function (v) {
     console.log(v);
     let param = v[0];
+    paramValues = param;
     let decisionTimes = v[1];
     let perceptions = v[2];
     let latencies = v[3];
@@ -35,6 +38,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
         balanceInput.id = "balance" + i;
         balanceInput.name = "balance" + i;
         balanceInput.type = "number";
+        balanceInput.step = "0.01";
         balanceInput.value = param.balance;
         balanceDiv.append(balanceLabel);
         balanceDiv.append(balanceInput);
@@ -48,6 +52,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
         latencyInput.id = "latency" + i;
         latencyInput.name = "latency" + i;
         latencyInput.type = "number";
+        latencyInput.step = "0.01";
         latencyInput.value = latencies[i - 1];
         latencyDiv.append(latencyLabel);
         latencyDiv.append(latencyInput);
@@ -61,6 +66,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
         decisionTimeInput.id = "decision-time" + i;
         decisionTimeInput.name = "decision-time" + i;
         decisionTimeInput.type = "number";
+        decisionTimeInput.step = "0.01";
         decisionTimeInput.value = decisionTimes[i - 1];
         decisionTimeDiv.append(decisionTimeLabel);
         decisionTimeDiv.append(decisionTimeInput);
@@ -74,28 +80,29 @@ eel.get_parameters_and_random_client_data()(function (v) {
         valuePerceptionModifierInput.id = "value-perception-modifier" + i;
         valuePerceptionModifierInput.name = "value-perception-modifier" + i;
         valuePerceptionModifierInput.type = "number";
+        valuePerceptionModifierInput.step = "0.01";
         valuePerceptionModifierInput.value = perceptions[i - 1];
         valuePerceptionModifierDiv.append(valuePerceptionModifierLabel);
         valuePerceptionModifierDiv.append(valuePerceptionModifierInput);
         contentDiv.append(valuePerceptionModifierDiv);
 
-        let portfolioDiv = document.createElement("div");
-        let portfolioLabel = document.createElement("label")
-        portfolioLabel.for = "portfolio" + i;
-        portfolioLabel.innerHTML = "Portifolio: ";
-        let portfolioSelect = document.createElement("select");
-        portfolioSelect.id = "portfolio" + i;
-        portfolioSelect.name = "portfolio" + i;
-        portfolioSelect.multiple = "true";
+        let portifolioDiv = document.createElement("div");
+        let portifolioLabel = document.createElement("label")
+        portifolioLabel.for = "portifolio" + i;
+        portifolioLabel.innerHTML = "Portifolio: ";
+        let portifolioSelect = document.createElement("select");
+        portifolioSelect.id = "portifolio" + i;
+        portifolioSelect.name = "portifolio" + i;
+        portifolioSelect.multiple = "true";
         for (let j = 1; j <= param.companies_num; j++) {
             let option = document.createElement("option");
             option.value = "STOCK" + j;
             option.innerHTML = "Company " + j;
-            portfolioSelect.append(option);
+            portifolioSelect.append(option);
         }
-        portfolioDiv.append(portfolioLabel);
-        portfolioDiv.append(portfolioSelect);
-        contentDiv.append(portfolioDiv);
+        portifolioDiv.append(portifolioLabel);
+        portifolioDiv.append(portifolioSelect);
+        contentDiv.append(portifolioDiv);
 
         let preferedStocksDiv = document.createElement("div");
         let preferedStocksLabel = document.createElement("label")
@@ -131,7 +138,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
 
     let input = document.createElement("input");
     input.type = "submit";
-    input.valeu = "Continuar";
+    input.value = "Continuar";
 
     form.append(input);
 });
@@ -140,7 +147,36 @@ const form = document.getElementById("parameters");
 
 form.addEventListener("submit", function (event) {
     event.preventDefault();
-    const FD = new FormData(form);
-    let vals = Array.from(FD.entries());
-    console.log(vals);
+
+    let clientsData = []
+
+    let companyValueIDMap = {};
+    for (let i = 1; i <= paramValues.companies_num; i++) {
+        companyValueIDMap['Company ' + i] = "STOCK" + (i - 1);
+    }
+
+    for (let i = 1; i <= paramValues.investors_num; i++) {
+        let portifolio = Array.prototype.slice.call(document.querySelectorAll('#portifolio' + i + ' option:checked'), 0).map(function (v, i, a) {
+            return v.value;
+        });
+        let preferedStocks = [];
+        let element = document.getElementById("prefered-stocks" + i);
+        for (let child of element.children) {
+            preferedStocks.push(companyValueIDMap[child.innerHTML]);
+        }
+
+        let clientData = {
+            balance: parseFloat(document.getElementById("balance" + i).value),
+            latency: parseFloat(document.getElementById("latency" + i).value),
+            decision_time: parseFloat(document.getElementById("decision-time" + i).value),
+            value_perception_modifier: parseFloat(document.getElementById("value-perception-modifier" + i).value),
+            portifolio: portifolio,
+            prefered_stocks: preferedStocks
+        };
+
+        clientsData.push(clientData);
+    }
+    eel.set_client_data(clientsData)(function () {
+        window.close();
+    });
 });

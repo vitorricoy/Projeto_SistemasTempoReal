@@ -6,8 +6,10 @@ class ParametersInput:
 
     def __init__(self):
         self.parameters = {}
+        self.client_data = {}
+        self.company_data = {}
 
-    def new_read_parameters(self):
+    def read_parameters(self):
         eel.init('parameters_interface')
 
         @eel.expose
@@ -15,44 +17,44 @@ class ParametersInput:
             self.parameters = values
 
         @eel.expose
+        def set_client_data(values):
+            self.client_data = values
+
+        @eel.expose
+        def set_company_data(values):
+            self.company_data = values
+
+        @eel.expose
         def get_parameters_and_random_client_data():
-            decision_times = [random.uniform(1, self.parameters['max_client_processing_time'])/1000 for _ in range(self.parameters['investors_num'])]
-            perceptions = [random.uniform(-self.parameters['perception_variation'], self.parameters['perception_variation']) for _ in range(self.parameters['investors_num'])]
-            perceptions.sort(key=lambda x: abs(x))
-            sorted_decision_times = list(enumerate(decision_times))
-            sorted_decision_times.sort(key= lambda x: x[1])
-            mapping_index_perception_position = dict()
-            for i in range(self.parameters['investors_num']):
-                mapping_index_perception_position[sorted_decision_times[i][0]] = i
-            perception_by_index = [perceptions[mapping_index_perception_position[i]] for i in range(self.parameters['investors_num'])]
-            latencies = [random.uniform(1, int(self.parameters['maximum_latency']))/1000 for _ in range(self.parameters['investors_num'])]
-            return self.parameters, decision_times, perception_by_index, latencies
+            decision_times = [round(random.uniform(1, self.parameters['max_client_processing_time']), 2) for _ in range(self.parameters['investors_num'])]
+            perceptions = [round(random.uniform(-self.parameters['perception_variation'], self.parameters['perception_variation']), 2) for _ in range(self.parameters['investors_num'])]
+            latencies = [round(random.uniform(1, int(self.parameters['maximum_latency'])), 2) for _ in range(self.parameters['investors_num'])]
+            return self.parameters, decision_times, perceptions, latencies
+
+        @eel.expose
+        def get_parameters_and_prices():
+            prices = [round(random.uniform(self.parameters['min_stock_value'], self.parameters['max_stock_value']), 2) for _ in range(self.parameters['companies_num'])]
+            return self.parameters, prices
 
         def close_callback(route, websockets):
-            print(route)
             if not websockets:
-                thread = threading.Thread(target = lambda: eel.start('client-data.html', port=8001, close_callback=close_callback))
-                thread.start()
-                thread.join()
-                exit()
+                if route == 'index.html':
+                    thread = threading.Thread(target = lambda: eel.start('client-data.html', port=8001, close_callback=close_callback))
+                    thread.start()
+                    thread.join()
+                    exit()
+                elif route == 'client-data.html':
+                    thread = threading.Thread(target = lambda: eel.start('company-data.html', port=8002, close_callback=close_callback))
+                    thread.start()
+                    thread.join()
+                    exit()
+                else:
+                    exit()
         
         thread = threading.Thread(target = lambda: eel.start('index.html', close_callback=close_callback))
         thread.start()
         thread.join()
         print('Starting...')
-        if not self.parameters:
+        if not self.parameters or not self.client_data or not self.company_data:
             exit()
-        return self.parameters
-
-    def read_parameters(self):
-        return {
-            'balance': 100,
-            'investors_num': 5,
-            'perception_variation': 30,
-            'maximum_latency': 10,
-            'companies_num': 5,
-            'request_period': 500,
-            'process_period': 100,
-            'number_of_stocks': 5,
-            'max_client_processing_time': 5
-        }
+        return self.parameters, self.client_data, self.company_data

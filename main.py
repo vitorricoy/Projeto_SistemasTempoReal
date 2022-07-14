@@ -12,8 +12,8 @@ import time
 
 def main():
     parameters_input = ParametersInput()
-    parameters = parameters_input.new_read_parameters()
-    global_state = create_initial_state(parameters)
+    parameters, client_data, company_data = parameters_input.read_parameters()
+    global_state = create_initial_state(parameters, company_data, client_data)
 
     server = Server(global_state)
 
@@ -21,20 +21,13 @@ def main():
 
     companies = list(global_state.stock_prices.keys())
 
-    perception_variation = float(parameters['perception_variation'])
-
-    max_processing_time = float(parameters['max_client_processing_time'])
-
-    decision_times, perception_by_index = generate_decision_time_and_perceptions(investors_num, perception_variation, max_processing_time)
-
     clients_id = []
     clients = []
     for i in range(investors_num):
-        random.shuffle(companies)
-        decision_time = decision_times[i]
-        perception = perception_by_index[i]
+        decision_time = client_data[i]['decision_time']
+        perception = client_data[i]['value_perception_modifier']
         clients_id.append('Client'+str(i))
-        clients.append(Client('Client'+str(i), global_state, companies, random.uniform(1, int(parameters['maximum_latency']))/1000, decision_time, perception/1000, server))
+        clients.append(Client('Client'+str(i), global_state, client_data[i]['prefered_stocks'], client_data[i]['latency'], decision_time, perception/100, server))
 
     # thread
     graphics = Graphics()
@@ -119,27 +112,21 @@ def generate_decision_time_and_perceptions(investors_num, perception_variation, 
     perception_by_index = [perceptions[mapping_index_perception_position[i]] for i in range(investors_num)]
     return decision_times, perception_by_index
 
-def create_initial_state(parameters):
+def create_initial_state(parameters, company_data, client_data):
     global_state = GlobalState()
     investors_num = int(parameters["investors_num"])
     companies_num = int(parameters["companies_num"])
-    starting_balance = int(parameters["balance"])
 
     for i in range(investors_num):
         client_name = 'Client' + str(i)
-        global_state.clients_data[client_name] = ClientData(client_name, starting_balance, 0, [])
+        global_state.clients_data[client_name] = ClientData(client_name, client_data[i]['balance'], 0, client_data[i]['portifolio'])
 
     for i in range(companies_num):
         company_name = 'STOCK' + str(i)
-        global_state.stock_prices[company_name] = random.uniform(starting_balance*0.05, starting_balance*0.2)
+        global_state.stock_prices[company_name] = company_data[i]['price']
         global_state.stock_values[company_name] = global_state.stock_prices[company_name]
 
     return global_state
-
-
-def print_clients_state(global_state: GlobalState):
-    for (id, data) in global_state.clients_data.items():
-        print(f'Client Id={id}, balance={data.balance}, portfolio={data.portfolio}')
 
     
 if __name__ == '__main__':

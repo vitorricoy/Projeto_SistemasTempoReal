@@ -23,7 +23,7 @@ class Client:
 
     def update_stock_prices(self):
         # The update happens on the global state list, so we only need to simulate the latency
-        time.sleep(self.latency)
+        time.sleep(self.latency/1000)
 
     def register_lost_deadline(self):
         self.global_state.clients_data[self.client_id].lost_deadline += 1
