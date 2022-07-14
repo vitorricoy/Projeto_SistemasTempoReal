@@ -39,11 +39,15 @@ class ParametersInput:
         def close_callback(route, websockets):
             if not websockets:
                 if route == 'index.html':
+                    if not self.parameters:
+                        exit()
                     thread = threading.Thread(target = lambda: eel.start('client-data.html', port=8001, close_callback=close_callback))
                     thread.start()
                     thread.join()
                     exit()
                 elif route == 'client-data.html':
+                    if not self.parameters or not self.client_data:
+                        exit()
                     thread = threading.Thread(target = lambda: eel.start('company-data.html', port=8002, close_callback=close_callback))
                     thread.start()
                     thread.join()
@@ -57,4 +61,5 @@ class ParametersInput:
         print('Starting...')
         if not self.parameters or not self.client_data or not self.company_data:
             exit()
+        print(self.client_data)
         return self.parameters, self.client_data, self.company_data

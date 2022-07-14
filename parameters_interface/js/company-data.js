@@ -7,49 +7,29 @@ eel.get_parameters_and_prices()(function (v) {
     paramValues = param;
     let form = document.getElementById("parameters");
     for (let i = 1; i <= param.companies_num; i++) {
-        let company = document.createElement("div");
-        let button = document.createElement("button");
-        button.type = "button";
-        button.className = "collapsible";
-        button.innerHTML = "Company " + i;
-
-        button.addEventListener("click", function () {
-            this.classList.toggle("active");
-            var content = this.nextElementSibling;
-            if (content.style.display === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
-            }
-        });
-
-        company.append(button);
-
-        let contentDiv = document.createElement("div");
-        contentDiv.className = "content";
-
         let priceDiv = document.createElement("div");
         let priceLabel = document.createElement("label")
         priceLabel.for = "price" + i;
         priceLabel.innerHTML = "Initial Price: ";
+        priceLabel.className = "mdl-textfield__label";
         let priceInput = document.createElement("input");
         priceInput.id = "price" + i;
         priceInput.name = "price" + i;
         priceInput.type = "number";
         priceInput.step = "0.01";
         priceInput.value = prices[i - 1];
+        priceInput.className = "mdl-textfield__input";
+        priceDiv.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
         priceDiv.append(priceLabel);
         priceDiv.append(priceInput);
-        contentDiv.append(priceDiv);
-
-        company.append(contentDiv);
-
-        form.append(company);
+        form.append(priceDiv);
     }
-
+    let br = document.createElement("br");
+    form.append(br);
     let input = document.createElement("input");
     input.type = "submit";
     input.value = "Executar";
+    input.className = "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored";
 
     form.append(input);
 });
