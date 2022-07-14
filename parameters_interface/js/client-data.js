@@ -151,16 +151,51 @@ eel.get_parameters_and_random_client_data()(function (v) {
         form.append(clientDiv);
     }
 
-    let input = document.createElement("input");
-    input.type = "submit";
-    input.value = "Continuar";
-    input.className = "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored";
+    // let input = document.createElement("input");
+    // input.type = "submit";
+    // input.value = "Continuar";
+    // input.className = "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored";
 
-    form.append(input);
+    // form.append(input);
 
     var selectScript = document.createElement('script');
     selectScript.setAttribute('src', 'js/multi-select-dropdown.js');
     document.body.appendChild(selectScript);
+});
+
+eel.get_parameters_and_prices()(function (v) {
+    let param = v[0];
+    let prices = v[1];
+    paramValues = param;
+    let form = document.getElementById("parameters");
+    let br1 = document.createElement("br");
+    form.append(br1);
+    for (let i = 1; i <= param.companies_num; i++) {
+        let priceDiv = document.createElement("div");
+        let priceLabel = document.createElement("label")
+        priceLabel.for = "price" + i;
+        priceLabel.innerHTML = "Company " + i + " Initial Price: ";
+        priceLabel.className = "mdl-textfield__label";
+        let priceInput = document.createElement("input");
+        priceInput.id = "price" + i;
+        priceInput.name = "price" + i;
+        priceInput.type = "number";
+        priceInput.step = "0.01";
+        priceInput.value = prices[i - 1];
+        priceInput.className = "mdl-textfield__input";
+        priceDiv.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
+        priceDiv.append(priceLabel);
+        priceDiv.append(priceInput);
+        form.append(priceDiv);
+    }
+    let br = document.createElement("br");
+    form.append(br);
+    let input = document.createElement("input");
+    input.type = "submit";
+    input.value = "Executar";
+    input.className = "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored";
+
+    form.append(input);
 });
 
 const form = document.getElementById("parameters");
@@ -168,7 +203,18 @@ const form = document.getElementById("parameters");
 form.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    let clientsData = []
+    let companiesData = []
+
+    for (let i = 1; i <= paramValues.companies_num; i++) {
+
+        let companyData = {
+            price: parseFloat(document.getElementById("price" + i).value)
+        };
+
+        companiesData.push(companyData);
+    }
+
+    let clientsData = [];
 
     let companyValueIDMap = {};
     for (let i = 1; i <= paramValues.companies_num; i++) {
@@ -197,7 +243,7 @@ form.addEventListener("submit", function (event) {
 
         clientsData.push(clientData);
     }
-    eel.set_client_data(clientsData)(function () {
+    eel.set_client_data(clientsData, companiesData)(function () {
         window.close();
     });
 });

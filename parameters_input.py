@@ -17,12 +17,9 @@ class ParametersInput:
             self.parameters = values
 
         @eel.expose
-        def set_client_data(values):
-            self.client_data = values
-
-        @eel.expose
-        def set_company_data(values):
-            self.company_data = values
+        def set_client_data(client, company):
+            self.client_data = client
+            self.company_data = company
 
         @eel.expose
         def get_parameters_and_random_client_data():
@@ -42,13 +39,6 @@ class ParametersInput:
                     if not self.parameters:
                         exit()
                     thread = threading.Thread(target = lambda: eel.start('client-data.html', port=8001, close_callback=close_callback))
-                    thread.start()
-                    thread.join()
-                    exit()
-                elif route == 'client-data.html':
-                    if not self.parameters or not self.client_data:
-                        exit()
-                    thread = threading.Thread(target = lambda: eel.start('company-data.html', port=8002, close_callback=close_callback))
                     thread.start()
                     thread.join()
                     exit()
