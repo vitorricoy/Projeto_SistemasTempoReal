@@ -1,34 +1,27 @@
 var paramValues;
 
 eel.get_parameters_and_random_client_data()(function (v) {
-    console.log(v);
     let param = v[0];
     paramValues = param;
     let decisionTimes = v[1];
     let perceptions = v[2];
     let latencies = v[3];
     let form = document.getElementById("parameters");
+    let accordion = document.createElement("div");
+    accordion.id = "the-accordion";
+    accordion.className = "accordion-wrapper";
     for (let i = 1; i <= param.investors_num; i++) {
+        let accordionPanel = document.createElement("div");
+        accordionPanel.className = "accordion-panel";
         let clientDiv = document.createElement("div");
-        let button = document.createElement("button");
-        button.type = "button";
-        button.className = "collapsible mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored";
-        button.innerHTML = "Client " + i;
-
-        button.addEventListener("click", function () {
-            this.classList.toggle("active");
-            var content = this.nextElementSibling;
-            if (content.style.display === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
-            }
-        });
-
-        clientDiv.append(button);
+        clientDiv.className = "accordion-title";
+        let title = document.createElement("a");
+        title.href = "#";
+        title.innerHTML = "Client " + i;
+        clientDiv.append(title);
 
         let contentDiv = document.createElement("div");
-        contentDiv.className = "content";
+        contentDiv.className = "accordion-content";
 
         let balanceDiv = document.createElement("div");
         let balanceLabel = document.createElement("label")
@@ -134,8 +127,6 @@ eel.get_parameters_and_random_client_data()(function (v) {
             .map(value => ({ value, sort: Math.random() }))
             .sort((a, b) => a.sort - b.sort)
             .map(({ value }) => value);
-        console.log(companiesIndexes);
-        console.log(shuffledCompaniesIndexes);
         for (let j of shuffledCompaniesIndexes) {
             let li = document.createElement("li");
             li.innerHTML = "<svg enable-background='new 0 0 24 24' height='12' viewBox='2.612 0 18.341 7.661' width='24' xmlns='http://www.w3.org/2000/svg'><g><rect fill='none' height='24' width='24'/></g><g transform='matrix(1, 0, 0, 1, -0.029021, -8.386941)'><g><g><path d='M20,9H4v2h16V9z M4,15h16v-2H4V15z'/></g></g></g></svg><p style='margin-bottom: 0px; margin-left: 15px;'>Company " + j + "</p>";
@@ -146,21 +137,34 @@ eel.get_parameters_and_random_client_data()(function (v) {
         preferedStocksDiv.append(preferedStocksUl);
         contentDiv.append(preferedStocksDiv);
 
-        clientDiv.append(contentDiv);
+        accordionPanel.append(clientDiv);
+        accordionPanel.append(contentDiv);
 
-        form.append(clientDiv);
+        accordion.append(accordionPanel);
     }
 
-    // let input = document.createElement("input");
-    // input.type = "submit";
-    // input.value = "Continuar";
-    // input.className = "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored";
+    form.append(accordion);
 
-    // form.append(input);
-
-    var selectScript = document.createElement('script');
+    let selectScript = document.createElement('script');
     selectScript.setAttribute('src', 'js/multi-select-dropdown.js');
     document.body.appendChild(selectScript);
+
+    let accordionCss = document.createElement('link');
+    accordionCss.rel = "stylesheet";
+    accordionCss.href = "css/accordionjs.min.css";
+    document.body.appendChild(accordionCss);
+
+    let accordionMinScript = document.createElement('script');
+    accordionMinScript.charset = "utf-8";
+    accordionMinScript.src = "js/accordionjs.min.js";
+    accordionMinScript.onload = () => {
+        let accordionScript = document.createElement('script');
+        accordionScript.type = "text/javascript";
+        accordionScript.innerHTML = "(function(){ new window.AccordionJS();})();";
+        document.body.appendChild(accordionScript);
+    };
+    document.body.appendChild(accordionMinScript);
+
 });
 
 eel.get_parameters_and_prices()(function (v) {
@@ -174,7 +178,7 @@ eel.get_parameters_and_prices()(function (v) {
         let priceDiv = document.createElement("div");
         let priceLabel = document.createElement("label")
         priceLabel.for = "price" + i;
-        priceLabel.innerHTML = "Company " + i + " Initial Price: ";
+        priceLabel.innerHTML = "Company " + i + " Initial Value: ";
         priceLabel.className = "mdl-textfield__label";
         let priceInput = document.createElement("input");
         priceInput.id = "price" + i;
