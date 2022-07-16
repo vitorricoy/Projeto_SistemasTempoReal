@@ -26,7 +26,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
         let balanceDiv = document.createElement("div");
         let balanceLabel = document.createElement("label")
         balanceLabel.for = "balance" + i;
-        balanceLabel.innerHTML = "Balance: ";
+        balanceLabel.innerHTML = "Balance ($): ";
         balanceLabel.className = "mdl-textfield__label";
         let balanceInput = document.createElement("input");
         balanceInput.id = "balance" + i;
@@ -43,7 +43,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
         let latencyDiv = document.createElement("div");
         let latencyLabel = document.createElement("label")
         latencyLabel.for = "latency" + i;
-        latencyLabel.innerHTML = "Latency: ";
+        latencyLabel.innerHTML = "Latency (ms): ";
         latencyLabel.className = "mdl-textfield__label";
         let latencyInput = document.createElement("input");
         latencyInput.id = "latency" + i;
@@ -60,7 +60,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
         let decisionTimeDiv = document.createElement("div");
         let decisionTimeLabel = document.createElement("label")
         decisionTimeLabel.for = "decision-time" + i;
-        decisionTimeLabel.innerHTML = "Decision time: ";
+        decisionTimeLabel.innerHTML = "Decision time (ms): ";
         decisionTimeLabel.className = "mdl-textfield__label";
         let decisionTimeInput = document.createElement("input");
         decisionTimeInput.id = "decision-time" + i;
@@ -77,7 +77,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
         let valuePerceptionModifierDiv = document.createElement("div");
         let valuePerceptionModifierLabel = document.createElement("label")
         valuePerceptionModifierLabel.for = "value-perception-modifier" + i;
-        valuePerceptionModifierLabel.innerHTML = "Value perception modifier: ";
+        valuePerceptionModifierLabel.innerHTML = "Value perception modifier (%): ";
         valuePerceptionModifierLabel.className = "mdl-textfield__label";
         let valuePerceptionModifierInput = document.createElement("input");
         valuePerceptionModifierInput.id = "value-perception-modifier" + i;
@@ -102,7 +102,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
         portifolioSelect.style = "width: 80%";
         for (let j = 1; j <= param.companies_num; j++) {
             let option = document.createElement("option");
-            option.value = "STOCK" + j;
+            option.value = "STOCK" + (j - 1);
             option.innerHTML = "Company " + j;
             portifolioSelect.append(option);
         }
