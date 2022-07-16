@@ -12,6 +12,10 @@ class Server:
         self.index = 0
 
     def process(self):
+        #for (key, data) in self.global_state.clients_data.items():
+        #    print(key)
+        #    print(data.portfolio)
+
         all_requests: List[Request] = self.global_state.buy_queue + self.global_state.sell_queue
         all_requests.sort(key=lambda req: req.index)
 
@@ -21,6 +25,9 @@ class Server:
             if self.check_for_interruption():
                 return
             request = all_requests.pop(0)
+            if request.type == 'BUY':
+                print(request)
+                print(f"CurrPrice={self.global_state.stock_prices[request.ticker]}")
             match = self.get_potential_match(request, all_requests)
             if match is None:
                 # no match, nothing we can do
@@ -68,7 +75,7 @@ class Server:
                 return # Not found
 
             if buyer.can_buy(effective_price):
-                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id)
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id, 'at price', effective_price)
                 buyer.buy(effective_price, request.ticker)
         else:
             buyer = self.global_state.clients_data[buyer_id]
@@ -77,7 +84,7 @@ class Server:
                 return # Not found
 
             if buyer.can_buy(effective_price) and seller.can_sell(request.ticker):
-                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id)
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id, 'at price', effective_price)
                 seller.sell(effective_price, request.ticker)
                 buyer.buy(effective_price, request.ticker)
 
@@ -90,7 +97,7 @@ class Server:
             if buyer is None:
                 return # Not found
             if buyer.can_buy(effective_price):
-                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id)
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id, 'at price', effective_price)
                 buyer.buy(effective_price, request.ticker)
         else:
             seller = self.global_state.clients_data[seller_id]
@@ -100,7 +107,7 @@ class Server:
                 return # Not found
 
             if buyer.can_buy(effective_price) and seller.can_sell(request.ticker):
-                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id)
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id, 'at price', effective_price)
                 seller.sell(effective_price, request.ticker)
                 buyer.buy(effective_price, request.ticker)
 

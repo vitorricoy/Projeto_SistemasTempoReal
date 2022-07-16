@@ -86,7 +86,6 @@ class Graphics:
 
             for i, client in enumerate(clients_list):
                 balance = 0 if len(global_state.statistics.clients_data) == 0 else global_state.statistics.clients_data[-1][client].balance
-                print(global_state.statistics.stock_prices[-1])
                 portfolio = 0 if len(global_state.statistics.clients_data) == 0 else sum([global_state.statistics.stock_prices[-1][stock] for stock in global_state.statistics.clients_data[-1][client].portfolio])
                 lost_deadline = 0 if len(global_state.statistics.clients_data) == 0 else global_state.statistics.clients_data[-1][client].lost_deadline
 
