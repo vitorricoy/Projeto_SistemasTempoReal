@@ -18,6 +18,7 @@ class ParametersInput:
 
         @eel.expose
         def set_client_data(client, company):
+            print(client)
             self.client_data = client
             self.company_data = company
 
@@ -51,5 +52,4 @@ class ParametersInput:
         print('Starting...')
         if not self.parameters or not self.client_data or not self.company_data:
             exit()
-        print(self.client_data)
         return self.parameters, self.client_data, self.company_data

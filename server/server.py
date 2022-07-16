@@ -10,6 +10,10 @@ class Server:
     def __init__(self, global_state: GlobalState):
         self.global_state = global_state
         self.index = 0
+    
+    def add_synthetic_exchange_orders(self):
+        # TODO add synthetic orders to force market to move
+        pass
 
     def process(self):
         #for (key, data) in self.global_state.clients_data.items():
@@ -26,8 +30,9 @@ class Server:
                 return
             request = all_requests.pop(0)
             if request.type == 'BUY':
-                print(request)
-                print(f"CurrPrice={self.global_state.stock_prices[request.ticker]}")
+                #print(request)
+                #print(f"CurrPrice={self.global_state.stock_prices[request.ticker]}")
+                pass
             match = self.get_potential_match(request, all_requests)
             if match is None:
                 # no match, nothing we can do

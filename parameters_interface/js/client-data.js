@@ -74,12 +74,38 @@ eel.get_parameters_and_random_client_data()(function (v) {
         decisionTimeDiv.append(decisionTimeInput);
         contentDiv.append(decisionTimeDiv);
 
-        let valuePerceptionModifierDiv = document.createElement("div");
-        let valuePerceptionModifierLabel = document.createElement("label")
+        let valuePerceptionDiv = document.createElement("div");
+        valuePerceptionDiv.style = "display: flex; flex-direction: column;";
+        let valuePerceptionText = document.createElement("p");
+        valuePerceptionText.innerHTML = "Value perception: ";
+        valuePerceptionText.className = "mdl-typography--subhead";
+        valuePerceptionDiv.append(valuePerceptionText);
+
+        for (let j = 1; j <= param.companies_num; j++) {
+            let valuePerceptionRow = document.createElement("div");
+            let valuePerceptionLabel = document.createElement("label")
+            valuePerceptionLabel.for = "value-perception-" + i + "-stock" + (j-1);
+            valuePerceptionLabel.innerHTML = "Value perception for stock STOCK " + (j-1) + " (absolute value): ";
+            valuePerceptionLabel.className = "mdl-textfield__label";
+            
+            let valuePerceptionOfStock = document.createElement("input");
+            valuePerceptionOfStock.id = "value-perception-" + i + "-stock" + (j-1);
+            valuePerceptionOfStock.name = "value-perception-" + i + "-stock" + (j-1);
+            valuePerceptionOfStock.type = "number";
+            valuePerceptionOfStock.step = "0.01";
+            valuePerceptionOfStock.className = "mdl-textfield__input";
+            valuePerceptionRow.append(valuePerceptionLabel);
+            
+            valuePerceptionRow.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
+            valuePerceptionRow.append(valuePerceptionOfStock);
+
+            valuePerceptionDiv.append(valuePerceptionRow);
+        }
+        /*let valuePerceptionModifierLabel = document.createElement("label")
         valuePerceptionModifierLabel.for = "value-perception-modifier" + i;
         valuePerceptionModifierLabel.innerHTML = "Value perception modifier (%): ";
-        valuePerceptionModifierLabel.className = "mdl-textfield__label";
-        let valuePerceptionModifierInput = document.createElement("input");
+        valuePerceptionModifierLabel.className = "mdl-textfield__label";*/
+        /*let valuePerceptionModifierInput = document.createElement("input");
         valuePerceptionModifierInput.id = "value-perception-modifier" + i;
         valuePerceptionModifierInput.name = "value-perception-modifier" + i;
         valuePerceptionModifierInput.type = "number";
@@ -88,8 +114,8 @@ eel.get_parameters_and_random_client_data()(function (v) {
         valuePerceptionModifierInput.className = "mdl-textfield__input";
         valuePerceptionModifierDiv.append(valuePerceptionModifierLabel);
         valuePerceptionModifierDiv.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
-        valuePerceptionModifierDiv.append(valuePerceptionModifierInput);
-        contentDiv.append(valuePerceptionModifierDiv);
+        valuePerceptionModifierDiv.append(valuePerceptionModifierInput);*/
+        contentDiv.append(valuePerceptionDiv);
 
         let portifolioDiv = document.createElement("div");
         let portifolioLabel = document.createElement("label")
@@ -104,6 +130,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
             let option = document.createElement("option");
             option.value = "STOCK" + (j - 1);
             option.innerHTML = "Company " + j;
+            option.selected = true;
             portifolioSelect.append(option);
         }
         portifolioDiv.append(portifolioLabel);
@@ -235,12 +262,22 @@ form.addEventListener("submit", function (event) {
             let text = child.querySelector("p");
             preferedStocks.push(companyValueIDMap[text.innerHTML]);
         }
+        let values_perceptions = {};
+        for (let j = 1; j <= paramValues.companies_num; j++) {
+            const key = companyValueIDMap['Company ' + j];
+
+            const value = parseFloat(document.getElementById("value-perception-" + i + "-stock" + (j-1)).value);
+            values_perceptions[key] = value;
+        }
+
+        console.log(values_perceptions);
 
         let clientData = {
             balance: parseFloat(document.getElementById("balance" + i).value),
             latency: parseFloat(document.getElementById("latency" + i).value),
             decision_time: parseFloat(document.getElementById("decision-time" + i).value),
-            value_perception_modifier: parseFloat(document.getElementById("value-perception-modifier" + i).value),
+            values_perceptions: values_perceptions,
+            //value_perception_modifier: parseFloat(document.getElementById("value-perception-modifier" + i).value),
             portifolio: portifolio,
             prefered_stocks: preferedStocks
         };

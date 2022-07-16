@@ -1,13 +1,15 @@
 import decimal
-from typing import List
+from typing import Dict, List
 
 
 class ClientData:
-    def __init__(self, id: str, balance: decimal.Decimal, lost_deadline: int, initial_portfolio: List[str] = []) -> None:
+    def __init__(self, id: str, balance: decimal.Decimal, lost_deadline: int, initial_portfolio: List[str] = [],
+        values_perceptions: Dict[str, decimal.Decimal] = {}) -> None:
         self.id = id
         self.balance = balance
         self.portfolio = initial_portfolio
         self.lost_deadline = lost_deadline
+        self.values_perceptions = values_perceptions
 
     def can_buy(self, price: decimal.Decimal):
         return price <= self.balance
