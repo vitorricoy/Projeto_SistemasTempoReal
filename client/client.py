@@ -25,6 +25,10 @@ class Client:
     def update_stock_prices(self):
         # The update happens on the global state list, so we only need to simulate the latency
         time.sleep(self.latency/1000)
+        for _ in range(int(self.latency/100)):
+            if self.check_for_interruption():
+                return
+            time.sleep(0.01)
 
     def register_lost_deadline(self):
         self.global_state.clients_data[self.client_id].lost_deadline += 1
@@ -64,7 +68,7 @@ class Client:
             if perceived_value > price:
                 diff = abs(perceived_value - price)
                 price_perturbation = np.random.beta(2, 5) * diff
-                buy_price = perceived_value - price_perturbation
+                buy_price = perceived_value + price_perturbation
                 print(f"{self.client_id} buying {stock} at {buy_price}")
                 self.server.receive_request(BuyRequest(self.client_id, stock, buy_price))
             
@@ -73,7 +77,7 @@ class Client:
             #     sell_price = perceived_value + price_perturbation
             #     self.server.receive_request(SellRequest(self.client_id, stock, sell_price))
 
-            if has_stock and price > perceived_value:
+            if has_stock and price >= perceived_value:
             # if has_stock and np.random.random() > 0.5 and perceived_value <= price:
                 # if perceived_value > price, no reason to sell: wait stock to go up.
                 # else: sell in range [perceived_value, price + perturbation]
