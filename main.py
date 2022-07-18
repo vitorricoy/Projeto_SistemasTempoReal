@@ -124,10 +124,7 @@ def put_exchange_orders(global_state, number_of_stocks):
         num_orders = random.randint(0, number_of_stocks)
         for _ in range(num_orders):
             global_state.exchange_buy_requests += 1
-            if random.random() < 0.5:
-                global_state.buy_queue.append(BuyRequest('Exchange', company, global_state.stock_prices[company]))
-            else:
-                global_state.buy_queue.append(BuyRequest('Exchange', company, global_state.stock_values[company]))
+            global_state.buy_queue.append(BuyRequest('Exchange', company, global_state.stock_prices[company]))
 
 def create_initial_state(parameters, company_data, client_data):
     global_state = GlobalState()
