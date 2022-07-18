@@ -85,7 +85,7 @@ eel.get_parameters_and_random_client_data()(function (v) {
             let valuePerceptionRow = document.createElement("div");
             let valuePerceptionLabel = document.createElement("label")
             valuePerceptionLabel.for = "value-perception-" + i + "-stock" + (j - 1);
-            valuePerceptionLabel.innerHTML = "Value perception for stock STOCK " + (j - 1) + " (absolute value): ";
+            valuePerceptionLabel.innerHTML = "Value perception for stock STOCK " + (j - 1) + " (%): ";
             valuePerceptionLabel.className = "mdl-textfield__label";
 
             let valuePerceptionOfStock = document.createElement("input");

@@ -82,7 +82,7 @@ class Server:
             if stock in seen_prices:
                 self.global_state.stock_prices[stock] = seen_prices[stock]
             elif stock in all_seen_prices:
-                chosen_price = 0
+                chosen_price = self.global_state.stock_prices[stock]
                 for price in all_seen_prices[stock]:
                     if price > chosen_price and price <= self.global_state.stock_prices[stock]:
                         chosen_price = price
