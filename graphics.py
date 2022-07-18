@@ -141,4 +141,9 @@ class Graphics:
             ax[2,2].plot(x_data, y22_data, color=cmap(0))
 
         anim = FuncAnimation(fig, animation_frame, interval = period, repeat = False, blit = False)
+        fig.canvas.mpl_connect('close_event', lambda e: self.handle_close(e, global_state, anim))
         plt.show()
+
+    def handle_close(self, e, global_state, anim):
+        global_state.stop_execution = True
+        exit()

@@ -21,3 +21,4 @@ class GlobalState:
         self.lost_server_deadlines = 0
         self.stop_threads = False
         self.state_mutex = threading.Lock()
+        self.stop_execution = False

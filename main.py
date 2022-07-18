@@ -43,12 +43,24 @@ def main():
 def run_loop(clients, server, global_state, request_period, process_period, number_of_stocks, stock_price_variation):
     cont = 0
     while True:
+        if global_state.stop_execution:
+            break
         run_client_request_period(clients, request_period, global_state)
+        if global_state.stop_execution:
+            break
         put_exchange_orders(global_state, number_of_stocks)
         print(global_state.stock_prices)
+        if global_state.stop_execution:
+            break
         run_server_process_period(server, process_period, global_state)
+        if global_state.stop_execution:
+            break
         register_statistics(global_state)
+        if global_state.stop_execution:
+            break
         empty_order_queues(global_state)
+        if global_state.stop_execution:
+            break
         if cont == 10:
             cont = 0
             handle_stock_price_variation(global_state, stock_price_variation)
