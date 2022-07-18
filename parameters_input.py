@@ -18,7 +18,6 @@ class ParametersInput:
 
         @eel.expose
         def set_client_data(client, company):
-            print(client)
             self.client_data = client
             self.company_data = company
 

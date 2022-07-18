@@ -24,15 +24,27 @@ class Server:
         all_requests.sort(key=lambda req: req.index)
 
         prices = defaultdict(lambda: None)
+        all_stock_prices = defaultdict(lambda: None)
 
+        for request in all_requests:
+            if self.check_for_interruption():
+                return
+            if request.ticker in prices:
+                if request.type == 'BUY':
+                    all_stock_prices[request.ticker].append(request.max_price)
+                else:
+                    all_stock_prices[request.ticker].append(request.min_price)
+            else:
+                if request.type == 'BUY':
+                    all_stock_prices[request.ticker] = [request.max_price]
+                else:
+                    all_stock_prices[request.ticker] = [request.min_price]
+        if self.check_for_interruption():
+                return
         while len(all_requests) > 0:
             if self.check_for_interruption():
                 return
             request = all_requests.pop(0)
-            if request.type == 'BUY':
-                #print(request)
-                #print(f"CurrPrice={self.global_state.stock_prices[request.ticker]}")
-                pass
             match = self.get_potential_match(request, all_requests)
             if match is None:
                 # no match, nothing we can do
@@ -50,11 +62,14 @@ class Server:
                 
                 if self.check_for_interruption():
                     return
-                prices[request.ticker] = effective_price
+                if request.ticker in prices:
+                    prices[request.ticker] = min(prices[request.ticker], effective_price)
+                else:
+                    prices[request.ticker] = effective_price
                 all_requests.remove(match)
             if self.check_for_interruption():
                     return
-            self.update_prices(prices)
+            self.update_prices(prices, all_stock_prices, list(self.global_state.stock_prices.keys()))
     
     def check_for_interruption(self):
         if self.global_state.stop_threads:
@@ -62,10 +77,16 @@ class Server:
             return True
         return False
 
-    def update_prices(self, seen_prices: Dict[str, Decimal]):
-        # If necessary, we can calculate some sort of delta here for display purposes
-        for (ticker, price) in seen_prices.items():
-            self.global_state.stock_prices[ticker] = price
+    def update_prices(self, seen_prices: Dict[str, Decimal], all_seen_prices: Dict[str, List[Decimal]], stocks: List[str]):
+        for stock in stocks:
+            if stock in seen_prices:
+                self.global_state.stock_prices[stock] = seen_prices[stock]
+            elif stock in all_seen_prices:
+                chosen_price = 0
+                for price in all_seen_prices[stock]:
+                    if price > chosen_price and price <= self.global_state.stock_prices[stock]:
+                        chosen_price = price
+                self.global_state.stock_prices[stock] = chosen_price
 
     def register_lost_deadline(self):
         self.global_state.lost_server_deadlines += 1
@@ -82,6 +103,14 @@ class Server:
             if buyer.can_buy(effective_price):
                 print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id, 'at price', effective_price)
                 buyer.buy(effective_price, request.ticker)
+        elif buyer_id == 'Exchange':
+            seller = self.global_state.clients_data[seller_id]
+            if seller is None:
+                return # Not found
+
+            if seller.can_sell(effective_price):
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id, 'at price', effective_price)
+                seller.sell(effective_price, request.ticker)
         else:
             buyer = self.global_state.clients_data[buyer_id]
             seller = self.global_state.clients_data[seller_id]
@@ -104,6 +133,14 @@ class Server:
             if buyer.can_buy(effective_price):
                 print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id, 'at price', effective_price)
                 buyer.buy(effective_price, request.ticker)
+        elif buyer_id == 'Exchange':
+            seller = self.global_state.clients_data[seller_id]
+            if seller is None:
+                return # Not found
+
+            if seller.can_sell(effective_price):
+                print(buyer_id, 'bought stock', request.ticker, 'from client', seller_id, 'at price', effective_price)
+                seller.sell(effective_price, request.ticker)
         else:
             seller = self.global_state.clients_data[seller_id]
             buyer = self.global_state.clients_data[buyer_id]
@@ -125,7 +162,7 @@ class Server:
     def get_potential_buy_match(self, request: BuyRequest, all_requests: List[Request]):
         max_price_to_buy = request.max_price
         for other in all_requests:
-            if other.index == request.index:
+            if request.client_id == other.client_id:
                 continue
             if other.type == 'SELL' and other.ticker == request.ticker and other.min_price <= max_price_to_buy:
                 return other
@@ -135,7 +172,7 @@ class Server:
     def get_potential_sell_match(self, request: SellRequest, all_requests: List[Request]):
         min_price_to_sell = request.min_price
         for other in all_requests:
-            if other.index == request.index:
+            if request.client_id == other.client_id:
                 continue
             if other.type == 'BUY' and other.ticker == request.ticker and other.max_price >= min_price_to_sell:
                 return other

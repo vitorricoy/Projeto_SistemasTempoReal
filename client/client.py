@@ -41,14 +41,14 @@ class Client:
                 return
             self.global_state.state_mutex.acquire()
             price = self.global_state.stock_prices[stock]
-            has_stock = stock in self.global_state.clients_data[self.client_id].portfolio
+            has_stock = self.client_id == 'Exchange' or stock in self.global_state.clients_data[self.client_id].portfolio
 
             # randomize value perception modifier
             #print(f"Prev value_perception_modifier={self.value_perception_modifier}")
             #self.value_perception_modifier = uniform(self.original_value_perception_modifier, -1*self.original_value_perception_modifier)
             #print(f"New value_perception_modifier={self.value_perception_modifier}")
-            perceived_value = self.values_perceptions[stock]
-            #perceived_value = self.global_state.stock_values[stock] + self.global_state.stock_values[stock] * self.value_perception_modifier
+            #perceived_value = self.values_perceptions[stock]
+            perceived_value = self.global_state.stock_values[stock] + self.global_state.stock_values[stock] * self.values_perceptions[stock]
             self.global_state.state_mutex.release()
             for _ in range(int(self.decision_time/100)):
                 if self.check_for_interruption():
@@ -64,28 +64,23 @@ class Client:
             if perceived_value > price:
                 diff = abs(perceived_value - price)
                 price_perturbation = np.random.beta(2, 5) * diff
-                if np.random.random() > 0.5:
-                    buy_price = perceived_value - price_perturbation
-                else:
-                    buy_price = price + price_perturbation
+                buy_price = perceived_value - price_perturbation
+                print(f"{self.client_id} buying {stock} at {buy_price}")
                 self.server.receive_request(BuyRequest(self.client_id, stock, buy_price))
             
-            if has_stock and np.random.random() > 0.5:
-                price_perturbation = np.random.beta(2, 5) * perceived_value
-                sell_price = perceived_value + price_perturbation
-                self.server.receive_request(SellRequest(self.client_id, stock, sell_price))
+            # if has_stock and np.random.random() > 0.5:
+            #     price_perturbation = np.random.beta(2, 5) * perceived_value
+            #     sell_price = perceived_value + price_perturbation
+            #     self.server.receive_request(SellRequest(self.client_id, stock, sell_price))
 
-            #if price > perceived_value:
-            if has_stock and np.random.random() > 0.5 and perceived_value <= price:
+            if has_stock and price > perceived_value:
+            # if has_stock and np.random.random() > 0.5 and perceived_value <= price:
                 # if perceived_value > price, no reason to sell: wait stock to go up.
                 # else: sell in range [perceived_value, price + perturbation]
                 diff = abs(perceived_value - price)
                 price_perturbation = np.random.beta(2, 5) * diff
-                if np.random.random() > 0.5:
-                    sell_price = perceived_value + price_perturbation
-                else:
-                    sell_price = price + price_perturbation
-                print(f"{self.client_id} selling at {sell_price}")
+                sell_price = price - price_perturbation
+                print(f"{self.client_id} selling {stock} at {sell_price}")
                 self.server.receive_request(SellRequest(self.client_id, stock, sell_price))
             """if perceived_value < price:
                 if self.check_for_interruption():

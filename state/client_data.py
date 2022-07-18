@@ -12,9 +12,13 @@ class ClientData:
         self.values_perceptions = values_perceptions
 
     def can_buy(self, price: decimal.Decimal):
+        if self.id == 'Exchange':
+            return True
         return price <= self.balance
 
     def can_sell(self, ticker: str):
+        if self.id == 'Exchange':
+            return True
         return ticker in self.portfolio
 
     def buy(self, price: decimal.Decimal, ticker: str):

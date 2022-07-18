@@ -8,6 +8,7 @@ from graphics import Graphics
 from parameters_input import ParametersInput
 from server.server import Server
 from state import statistics
+from state.buy_request import BuyRequest
 from state.client_data import ClientData
 from state.sell_request import SellRequest
 from state.state import GlobalState
@@ -42,8 +43,9 @@ def main():
 def run_loop(clients, server, global_state, request_period, process_period, number_of_stocks, stock_price_variation):
     cont = 0
     while True:
-        simulate_IPO(global_state, number_of_stocks)
         run_client_request_period(clients, request_period, global_state)
+        put_exchange_orders(global_state, number_of_stocks)
+        print(global_state.stock_prices)
         run_server_process_period(server, process_period, global_state)
         register_statistics(global_state)
         empty_order_queues(global_state)
@@ -70,10 +72,12 @@ def run_server_process_period(server, process_period, global_state):
 def empty_order_queues(global_state):
     global_state.buy_queue = []
     global_state.sell_queue = []
+    global_state.exchange_buy_requests = 0
+    global_state.exchange_sell_requests = 0
 
 def register_statistics(global_state):
-    buy_orders = len(global_state.buy_queue)
-    sell_orders = len(global_state.sell_queue)
+    buy_orders = len(global_state.buy_queue) - global_state.exchange_buy_requests
+    sell_orders = len(global_state.sell_queue) - global_state.exchange_sell_requests
     global_state.statistics = (statistics.Statistics(
             global_state.statistics.clients_data + [global_state.clients_data],
             global_state.statistics.lost_server_deadlines + [global_state.lost_server_deadlines], 
@@ -94,26 +98,21 @@ def run_client_request_period(clients, request_period, global_state):
     for thread in threads:
         thread.join()
 
-def simulate_IPO(global_state, number_of_stocks):
+def put_exchange_orders(global_state, number_of_stocks):
     for company in list(global_state.stock_prices.keys()):
         ocurrences = 0
         for client in list(global_state.clients_data.keys()):
             ocurrences += global_state.clients_data[client].portfolio.count(company)
         missing_ocurrences = number_of_stocks - ocurrences
         for _ in range(missing_ocurrences):
-            global_state.sell_queue.append(SellRequest('Exchange', company, global_state.stock_values[company]))
-
-def generate_decision_time_and_perceptions(investors_num, perception_variation, max_processing_time):
-    decision_times = [random.uniform(1, max_processing_time)/1000 for _ in range(investors_num)]
-    perceptions = [random.uniform(-perception_variation, perception_variation) for _ in range(investors_num)]
-    perceptions.sort(key=lambda x: abs(x))
-    sorted_decision_times = list(enumerate(decision_times))
-    sorted_decision_times.sort(key= lambda x: x[1])
-    mapping_index_perception_position = dict()
-    for i in range(investors_num):
-        mapping_index_perception_position[sorted_decision_times[i][0]] = i
-    perception_by_index = [perceptions[mapping_index_perception_position[i]] for i in range(investors_num)]
-    return decision_times, perception_by_index
+            global_state.exchange_sell_requests += 1
+            global_state.sell_queue.append(SellRequest('Exchange', company, global_state.stock_prices[company]))
+    
+    for company in list(global_state.stock_prices.keys()):
+        num_orders = random.randint(0, number_of_stocks)
+        for _ in range(num_orders):
+            global_state.exchange_buy_requests += 1
+            global_state.buy_queue.append(BuyRequest('Exchange', company, global_state.stock_prices[company]))
 
 def create_initial_state(parameters, company_data, client_data):
     global_state = GlobalState()

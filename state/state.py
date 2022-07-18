@@ -12,6 +12,8 @@ class GlobalState:
     def __init__(self):
         self.buy_queue: List[BuyRequest] = []
         self.sell_queue: List[SellRequest] = []
+        self.exchange_buy_requests = 0
+        self.exchange_sell_requests = 0
         self.clients_data: Dict[str, ClientData] = defaultdict(lambda: None)
         self.stock_values: Dict[str, Decimal] = defaultdict(lambda: None)
         self.stock_prices: Dict[str, Decimal] = defaultdict(lambda: None)
