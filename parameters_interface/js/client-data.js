@@ -102,20 +102,6 @@ eel.get_parameters_and_random_client_data()(function (v) {
 
             valuePerceptionDiv.append(valuePerceptionRow);
         }
-        /*let valuePerceptionModifierLabel = document.createElement("label")
-        valuePerceptionModifierLabel.for = "value-perception-modifier" + i;
-        valuePerceptionModifierLabel.innerHTML = "Value perception modifier (%): ";
-        valuePerceptionModifierLabel.className = "mdl-textfield__label";*/
-        /*let valuePerceptionModifierInput = document.createElement("input");
-        valuePerceptionModifierInput.id = "value-perception-modifier" + i;
-        valuePerceptionModifierInput.name = "value-perception-modifier" + i;
-        valuePerceptionModifierInput.type = "number";
-        valuePerceptionModifierInput.step = "0.01";
-        valuePerceptionModifierInput.value = perceptions[i - 1];
-        valuePerceptionModifierInput.className = "mdl-textfield__input";
-        valuePerceptionModifierDiv.append(valuePerceptionModifierLabel);
-        valuePerceptionModifierDiv.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
-        valuePerceptionModifierDiv.append(valuePerceptionModifierInput);*/
         contentDiv.append(valuePerceptionDiv);
 
         let portifolioDiv = document.createElement("div");

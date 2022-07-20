@@ -33,7 +33,6 @@ def main():
         clients_id.append('Client'+str(i))
         clients.append(Client('Client'+str(i), global_state, client_data[i]['prefered_stocks'], client_data[i]['latency'], decision_time, values_perceptions, server))
 
-    # thread
     graphics = Graphics()
     thread = threading.Thread(target = graphics.plot_graph, args= (global_state, int(parameters['request_period']) + int(parameters['process_period']), companies, clients_id))
     thread.start()
@@ -133,29 +132,12 @@ def create_initial_state(parameters, company_data, client_data):
     global_state = GlobalState()
     investors_num = int(parameters["investors_num"])
     companies_num = int(parameters["companies_num"])
-    num_of_stocks = int(parameters["number_of_stocks"])
-
-    stock_quantity_division = defaultdict(int)
-    for i in range(investors_num):
-        client_portfolio = client_data[i]['portifolio']
-        for stock in client_portfolio:
-            stock_quantity_division[stock] += 1
-
-    # Divide initial offer evenly to clients
-    for stock in stock_quantity_division:
-        stock_quantity_division[stock] = num_of_stocks // stock_quantity_division[stock]
-
 
     for i in range(investors_num):
         client_name = 'Client' + str(i)
         client_portfolio = client_data[i]['portifolio']
-        real_portfolio = []
-        for stock in client_portfolio:
-            stocks = [stock] * stock_quantity_division[stock] # copy stock
-            real_portfolio += stocks
-
         client_values_perceptions = client_data[i]['values_perceptions']
-        global_state.clients_data[client_name] = ClientData(client_name, client_data[i]['balance'], 0, real_portfolio, client_values_perceptions)
+        global_state.clients_data[client_name] = ClientData(client_name, client_data[i]['balance'], 0, client_portfolio, client_values_perceptions)
 
     for i in range(companies_num):
         company_name = 'STOCK' + str(i)

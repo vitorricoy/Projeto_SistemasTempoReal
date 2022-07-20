@@ -11,15 +11,7 @@ class Server:
         self.global_state = global_state
         self.index = 0
     
-    def add_synthetic_exchange_orders(self):
-        # TODO add synthetic orders to force market to move
-        pass
-
     def process(self):
-        #for (key, data) in self.global_state.clients_data.items():
-        #    print(key)
-        #    print(data.portfolio)
-
         all_requests: List[Request] = self.global_state.buy_queue + self.global_state.sell_queue
         all_requests.sort(key=lambda req: req.index)
 
@@ -52,7 +44,6 @@ class Server:
             else:
                 if self.check_for_interruption():
                     return
-                # TODO: maybe add locks?
                 if request.type == 'BUY':
                     effective_price = request.max_price # Here the BUY price is chosen - could be the other way around
                     self.perform_buy_operation(effective_price, request, match)
