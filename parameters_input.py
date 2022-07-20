@@ -24,7 +24,7 @@ class ParametersInput:
         @eel.expose
         def get_parameters_and_random_client_data():
             decision_times = [round(random.uniform(1, self.parameters['max_client_processing_time']), 2) for _ in range(self.parameters['investors_num'])]
-            perceptions = [round(random.uniform(-self.parameters['perception_variation'], self.parameters['perception_variation']), 2) for _ in range(self.parameters['investors_num'])]
+            perceptions = [round(random.uniform(0, self.parameters['perception_variation']), 2) for _ in range(self.parameters['investors_num'])]
             latencies = [round(random.uniform(1, int(self.parameters['maximum_latency'])), 2) for _ in range(self.parameters['investors_num'])]
             return self.parameters, decision_times, perceptions, latencies
 

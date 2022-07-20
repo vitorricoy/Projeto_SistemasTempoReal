@@ -65,7 +65,7 @@ class Client:
             #print(f"Perceived price: {perceived_value}, actual price: {price}")
             # With 50% probability send a order to buy
             #if np.random.random() > 0.5:
-            if perceived_value > price:
+            if self.global_state.clients_data[self.client_id].balance >= price and perceived_value > price:
                 diff = abs(perceived_value - price)
                 price_perturbation = np.random.beta(2, 5) * diff
                 buy_price = perceived_value + price_perturbation
